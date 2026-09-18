@@ -31,11 +31,6 @@
 
 ### 快速启动（推荐）
 
-#### Linux / macOS
-```bash
-./run.sh
-```
-
 #### Windows
 双击 `run.bat` 或在命令行中运行：
 ```cmd
@@ -49,48 +44,10 @@ run.bat
 - 打开浏览器
 
 **停止服务器：**
-- Linux/Mac: `./stop.sh`
 - Windows: `stop.bat`
 - 或者在运行服务器的终端窗口按 `Ctrl+C`
 
 ### 手动启动
-
-#### 在 Ubuntu/Linux 上部署
-
-1. **克隆或下载项目到本地**
-   ```bash
-   cd ~/下载/Word-recitation-system
-   ```
-
-2. **创建虚拟环境（可选但推荐）**
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate
-   ```
-
-3. **安装 Python 依赖**
-   ```bash
-   pip3 install -r requirements.txt
-   ```
-
-4. **启动后端服务**
-   ```bash
-   python3 server.py
-   ```
-
-   服务器启动后会显示：
-   ```
-   单词背诵系统服务器启动中...
-   数据存储目录: /home/用户名/下载/Word-recitation-system/data
-   访问地址: http://localhost:5000
-   ```
-
-5. **打开浏览器访问**
-   ```
-   http://localhost:5000
-   ```
-
-#### 在 Windows 上部署
 
 1. **打开命令提示符或 PowerShell**
    ```cmd
@@ -210,14 +167,9 @@ const CET6_VOCABULARY = [
 
 ### 服务器无法停止
 如果按 `Ctrl+C` 后服务器仍在后台运行：
-- Linux/Mac: 运行 `./stop.sh`
 - Windows: 运行 `stop.bat`
 - 或手动查找进程：
-  ```bash
-  # Linux/Mac
-  ps aux | grep server.py
-  kill <PID>
-  
+  ```cmd
   # Windows
   netstat -ano | findstr :5000
   taskkill /F /PID <PID>
@@ -225,7 +177,7 @@ const CET6_VOCABULARY = [
 
 ### 无法启动服务器
 - 确保已安装 Python 3.7+
-- 检查依赖是否已安装：`pip3 list | grep -i flask`
+- 检查依赖是否已安装：`pip list | findstr Flask`
 - 检查端口 5000 是否被占用，尝试更换端口：修改 `server.py` 中的端口号
 
 ### 页面显示"无法连接到服务器"
@@ -247,9 +199,9 @@ const CET6_VOCABULARY = [
 
 建议定期备份 `data` 目录：
 
-```bash
+```cmd
 # 手动备份
-cp -r data data_backup_$(date +%Y%m%d)
+xcopy data data_backup_%date:~0,4%%date:~5,2%%date:~8,2% /E /I
 
 # 或通过 API 备份
 curl http://localhost:5000/api/backup
