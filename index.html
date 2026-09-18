@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>单词背诵系统</title>
+    <link rel="stylesheet" href="styles.css?v=2">
+</head>
+<body>
+    <!-- 主界面 -->
+    <div id="main-view" class="view active">
+        <header>
+            <h1>单词背诵系统</h1>
+            <div class="header-controls">
+                <select id="book-select">
+                    <option value="cet6">六级词汇</option>
+                    <option value="kaoyan">考研词汇</option>
+                </select>
+                <button id="theme-toggle" class="icon-btn" title="切换主题">
+                    <span class="theme-icon">🌙</span>
+                </button>
+                <button id="settings-btn" class="icon-btn" title="设置">⚙️</button>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <!-- 签到区域 -->
+            <div class="checkin-section">
+                <button id="checkin-btn" class="checkin-btn">
+                    <span class="checkin-icon">✓</span>
+                    <span class="checkin-text">今日签到</span>
+                </button>
+                <div class="streak-info">
+                    <span id="streak-days">0</span> 天连续签到
+                </div>
+            </div>
+
+            <!-- 模块卡片 -->
+            <div class="modules-grid">
+                <div class="module-card" data-module="learning">
+                    <div class="module-icon">📖</div>
+                    <h3>学习</h3>
+                    <div class="module-progress">
+                        <span id="learning-count">0</span> 个单词
+                    </div>
+                    <button class="module-btn">开始学习</button>
+                </div>
+
+                <div class="module-card" data-module="review">
+                    <div class="module-icon">🔄</div>
+                    <h3>复习</h3>
+                    <div class="module-progress">
+                        <span id="review-count">0</span> 个单词
+                    </div>
+                    <button class="module-btn">开始复习</button>
+                </div>
+
+                <div class="module-card" data-module="mastered">
+                    <div class="module-icon">✅</div>
+                    <h3>已学完</h3>
+                    <div class="module-progress">
+                        <span id="mastered-progress">0/0</span>
+                    </div>
+                    <button class="module-btn">查看</button>
+                </div>
+            </div>
+
+            <!-- 统计图表 -->
+            <div class="stats-section">
+                <div class="chart-container">
+                    <canvas id="stats-chart"></canvas>
+                </div>
+            </div>
+
+            <!-- 签到日历 -->
+            <div class="calendar-section">
+                <h3>签到日历</h3>
+                <div id="calendar-grid" class="calendar-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 设置界面 -->
+    <div id="settings-view" class="view">
+        <div class="view-header">
+            <button class="back-btn">← 返回</button>
+            <h2>设置</h2>
+        </div>
+        <div class="settings-content">
+            <div class="setting-item">
+                <label for="words-per-group">每组学习单词数</label>
+                <input type="number" id="words-per-group" min="5" max="50" value="10">
+            </div>
+        </div>
+    </div>
+
+    <!-- 学习/复习界面 -->
+    <div id="study-view" class="view">
+        <div class="view-header">
+            <button class="back-btn">← 返回</button>
+            <div class="progress-bar-container">
+                <div id="progress-bar" class="progress-bar"></div>
+            </div>
+            <span id="progress-text">0/0</span>
+        </div>
+
+        <div class="study-content">
+            <!-- 第一轮：英文选中文 -->
+            <div id="round1" class="round-container">
+                <div class="question-card">
+                    <div class="round-label">第一轮：选择中文释义</div>
+                    <div class="word-display" id="word-en"></div>
+                    <div class="options-grid" id="options1"></div>
+                </div>
+            </div>
+
+            <!-- 第二轮：中文选英文 -->
+            <div id="round2" class="round-container hidden">
+                <div class="question-card">
+                    <div class="round-label">第二轮：选择英文单词</div>
+                    <div class="word-display" id="word-cn"></div>
+                    <div class="options-grid" id="options2"></div>
+                </div>
+            </div>
+
+            <!-- 第三轮：中文拼写英文 -->
+            <div id="round3" class="round-container hidden">
+                <div class="question-card">
+                    <div class="round-label">第三轮：拼写英文单词</div>
+                    <div class="word-display" id="word-cn-spell"></div>
+                    <input type="text" id="spell-input" class="spell-input" placeholder="输入英文单词">
+                    <button id="submit-spell" class="submit-btn">提交</button>
+                    <div id="spell-feedback" class="spell-feedback"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 已学完列表界面 -->
+    <div id="mastered-view" class="view">
+        <div class="view-header">
+            <button class="back-btn">← 返回</button>
+            <h2>已学完单词</h2>
+        </div>
+        <div class="mastered-content">
+            <div id="mastered-list" class="word-list"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="vocabulary.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
