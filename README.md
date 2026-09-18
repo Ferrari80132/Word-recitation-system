@@ -20,37 +20,103 @@
 - ✅ **进度可视化** - 实时显示每个模块的完成情况
 - ✅ **每日统计** - 图表展示最近7天的学习和复习数据
 - ✅ **签到系统** - 每日签到功能和签到日历
-- ✅ **数据持久化** - 所有学习进度自动保存到浏览器本地存储
+- ✅ **本地文件存储** - 所有学习进度保存到本地文件，支持备份
 
 ## 使用方法
 
-### 在Ubuntu 24.04上部署
+### 环境要求
 
-1. **将所有文件放在同一目录下**
-   ```bash
-   cd ~/下载/单词背诵网页
-   ls
-   # 应该看到: index.html  styles.css  vocabulary.js  app.js  README.md
-   ```
+- Python 3.7+
+- 现代浏览器（Chrome 90+, Firefox 88+, Safari 14+, Edge 90+）
 
-2. **使用Python启动本地服务器**
-   ```bash
-   python3 -m http.server 8000
-   ```
+### 快速启动（推荐）
 
-3. **打开浏览器访问**
-   ```
-   http://localhost:8000
-   ```
-
-### 或者直接在浏览器中打开
-
-也可以直接双击 `index.html` 文件，或在浏览器中打开：
+#### Linux / macOS
 ```bash
-firefox index.html
-# 或
-google-chrome index.html
+./run.sh
 ```
+
+#### Windows
+双击 `run.bat` 或在命令行中运行：
+```cmd
+run.bat
+```
+
+脚本会自动：
+- 创建 Python 虚拟环境
+- 安装依赖包
+- 启动服务器
+- 打开浏览器
+
+**停止服务器：**
+- Linux/Mac: `./stop.sh`
+- Windows: `stop.bat`
+- 或者在运行服务器的终端窗口按 `Ctrl+C`
+
+### 手动启动
+
+#### 在 Ubuntu/Linux 上部署
+
+1. **克隆或下载项目到本地**
+   ```bash
+   cd ~/下载/Word-recitation-system
+   ```
+
+2. **创建虚拟环境（可选但推荐）**
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate
+   ```
+
+3. **安装 Python 依赖**
+   ```bash
+   pip3 install -r requirements.txt
+   ```
+
+4. **启动后端服务**
+   ```bash
+   python3 server.py
+   ```
+
+   服务器启动后会显示：
+   ```
+   单词背诵系统服务器启动中...
+   数据存储目录: /home/用户名/下载/Word-recitation-system/data
+   访问地址: http://localhost:5000
+   ```
+
+5. **打开浏览器访问**
+   ```
+   http://localhost:5000
+   ```
+
+#### 在 Windows 上部署
+
+1. **打开命令提示符或 PowerShell**
+   ```cmd
+   cd C:\path\to\Word-recitation-system
+   ```
+
+2. **创建虚拟环境（可选但推荐）**
+   ```cmd
+   python -m venv venv
+   venv\Scripts\activate
+   ```
+
+3. **安装依赖**
+   ```cmd
+   pip install -r requirements.txt
+   ```
+
+4. **启动服务**
+   ```cmd
+   python server.py
+   ```
+
+5. **浏览器访问**
+   ```
+   http://localhost:5000
+   ```
 
 ## 学习流程
 
@@ -81,22 +147,46 @@ google-chrome index.html
 
 ## 技术特点
 
-- **纯前端应用** - 无需后端服务器
-- **本地数据存储** - 使用localStorage保存所有数据
+- **前后端分离** - Flask 后端 + 原生 JavaScript 前端
+- **本地文件存储** - 数据保存在 `data/user_data.json` 文件中
+- **RESTful API** - 标准的 API 接口设计
 - **响应式设计** - 支持各种屏幕尺寸
-- **现代化UI** - 使用CSS变量和过渡动画
-- **数据可视化** - 使用Chart.js绘制统计图表
+- **现代化UI** - 使用 CSS 变量和过渡动画
+- **数据可视化** - 使用 Chart.js 绘制统计图表
 
 ## 数据存储
 
-所有数据保存在浏览器的localStorage中，包括：
+所有学习数据保存在项目的 `data` 目录下：
+- `data/user_data.json` - 当前用户数据
+- `data/backup_*.json` - 自动备份文件（可选）
+
+保存的数据包括：
 - 学习进度
 - 复习计划
 - 已掌握单词
 - 签到记录
 - 每日统计
 
-**注意**：清除浏览器数据会导致学习进度丢失。
+## API 接口
+
+### 获取用户数据
+```
+GET /api/data
+返回: { "success": true, "data": {...} }
+```
+
+### 保存用户数据
+```
+POST /api/data
+请求体: { "currentBook": "cet6", "masteredWords": [...], ... }
+返回: { "success": true, "message": "数据保存成功" }
+```
+
+### 备份数据
+```
+GET /api/backup
+返回: { "success": true, "message": "备份成功: backup_20260918_123456.json" }
+```
 
 ## 词汇数据
 
@@ -104,14 +194,6 @@ google-chrome index.html
 - **考研词汇**：约100个高频词汇
 - 每个单词包含：英文、中文释义、考试频率
 - 单词按频率从高到低排序（非字母顺序）
-
-## 浏览器兼容性
-
-推荐使用现代浏览器：
-- Chrome 90+
-- Firefox 88+
-- Safari 14+
-- Edge 90+
 
 ## 自定义词汇
 
@@ -126,23 +208,70 @@ const CET6_VOCABULARY = [
 
 ## 故障排除
 
-### 页面无法加载
-- 确保所有文件在同一目录下
-- 检查浏览器控制台是否有错误信息
+### 服务器无法停止
+如果按 `Ctrl+C` 后服务器仍在后台运行：
+- Linux/Mac: 运行 `./stop.sh`
+- Windows: 运行 `stop.bat`
+- 或手动查找进程：
+  ```bash
+  # Linux/Mac
+  ps aux | grep server.py
+  kill <PID>
+  
+  # Windows
+  netstat -ano | findstr :5000
+  taskkill /F /PID <PID>
+  ```
 
-### 数据丢失
-- 不要清除浏览器缓存和cookie
-- 建议定期导出localStorage数据（可在浏览器开发者工具中操作）
+### 无法启动服务器
+- 确保已安装 Python 3.7+
+- 检查依赖是否已安装：`pip3 list | grep -i flask`
+- 检查端口 5000 是否被占用，尝试更换端口：修改 `server.py` 中的端口号
+
+### 页面显示"无法连接到服务器"
+- 确保后端服务正在运行
+- 检查浏览器控制台的错误信息
+- 确认访问地址为 `http://localhost:5000`
+
+### 数据无法保存
+- 检查 `data` 目录是否有写入权限
+- 查看服务器终端的错误日志
+- 尝试手动创建 `data` 目录
 
 ### 图表不显示
-- 确保Chart.js CDN可访问
+- 确保 Chart.js CDN 可访问
 - 检查网络连接
+- 尝试刷新页面
+
+## 数据备份
+
+建议定期备份 `data` 目录：
+
+```bash
+# 手动备份
+cp -r data data_backup_$(date +%Y%m%d)
+
+# 或通过 API 备份
+curl http://localhost:5000/api/backup
+```
 
 ## 许可证
 
-此项目仅供个人学习使用。
+此项目采用 GNU General Public License v3.0 开源协议。
 
 ## 更新日志
+
+### v1.0.2 (2026-09-18)
+- 🎉 **重大更新：数据存储方式改变**
+- ✨ 将数据存储从浏览器 localStorage 迁移到本地文件
+- ✨ 添加 Flask 后端服务器支持
+- ✨ 实现 RESTful API 接口（GET/POST /api/data, GET /api/backup）
+- ✨ 添加数据备份功能
+- ✨ 添加一键启动脚本（run.sh 和 run.bat）
+- ✨ 改进错误处理，即使服务器未连接也能正常使用
+- ✨ 数据持久化更可靠，不再受浏览器清理影响
+- 🐛 修复异步加载导致页面卡死的问题
+- 📝 更新部署文档，添加详细的安装和使用说明
 
 ### v1.0.0 (2024)
 - 初始版本
@@ -150,3 +279,4 @@ const CET6_VOCABULARY = [
 - 实现三轮学习法
 - 艾宾浩斯复习系统
 - 签到和统计功能
+

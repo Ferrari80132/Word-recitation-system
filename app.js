@@ -15,31 +15,55 @@ class VocabularyApp {
         this.checkinDates = new Set();
         this.dailyStats = {};
         this.chart = null;
+        this.apiBase = 'http://localhost:5000/api';
 
-        this.loadData();
+        this.init();
+    }
+
+    async init() {
+        await this.loadData();
         this.initEventListeners();
         this.renderMain();
         this.initChart();
     }
 
     // 加载保存的数据
-    loadData() {
-        const saved = localStorage.getItem('vocabularyApp');
-        if (saved) {
-            const data = JSON.parse(saved);
-            this.currentBook = data.currentBook || 'cet6';
-            this.wordsPerGroup = data.wordsPerGroup || 10;
-            this.masteredWords = data.masteredWords || [];
-            this.reviewWords = data.reviewWords || [];
-            this.checkinDates = new Set(data.checkinDates || []);
-            this.dailyStats = data.dailyStats || {};
+    async loadData() {
+        try {
+            const response = await fetch(`${this.apiBase}/data`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+
+            if (result.success && result.data) {
+                const data = result.data;
+                this.currentBook = data.currentBook || 'cet6';
+                this.wordsPerGroup = data.wordsPerGroup || 10;
+                this.masteredWords = data.masteredWords || [];
+                this.reviewWords = data.reviewWords || [];
+                this.checkinDates = new Set(data.checkinDates || []);
+                this.dailyStats = data.dailyStats || {};
+                console.log('数据加载成功');
+            }
+        } catch (error) {
+            console.error('加载数据失败:', error);
+            console.log('使用默认数据继续运行');
+            // 使用默认值，不阻止应用运行
         }
 
         this.updateLearningWords();
     }
 
     // 保存数据
-    saveData() {
+    async saveData() {
         const data = {
             currentBook: this.currentBook,
             wordsPerGroup: this.wordsPerGroup,
@@ -48,7 +72,31 @@ class VocabularyApp {
             checkinDates: Array.from(this.checkinDates),
             dailyStats: this.dailyStats
         };
-        localStorage.setItem('vocabularyApp', JSON.stringify(data));
+
+        try {
+            const response = await fetch(`${this.apiBase}/data`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            if (result.success) {
+                console.log('数据保存成功');
+            } else {
+                console.error('保存数据失败:', result.error);
+            }
+        } catch (error) {
+            console.error('保存数据失败:', error);
+            console.log('数据将在本地会话中保留，请检查服务器连接');
+        }
     }
 
     // 更新学习单词列表
@@ -72,6 +120,7 @@ class VocabularyApp {
             html.setAttribute('data-theme', newTheme);
             const icon = document.querySelector('.theme-icon');
             icon.textContent = newTheme === 'light' ? '☀️' : '🌙';
+            // 主题设置不需要保存到服务器，使用 localStorage 即可
             localStorage.setItem('theme', newTheme);
         });
 
