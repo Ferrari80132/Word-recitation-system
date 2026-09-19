@@ -152,21 +152,128 @@ GET /api/backup
 
 ## 词汇数据
 
-- **六级词汇**：约95个高频词汇
-- **考研词汇**：约100个高频词汇
-- 每个单词包含：英文、中文释义、考试频率
+- **六级词汇**：5651 个词汇（已导入）
+- **考研词汇**：9602 个词汇（已导入）
+- 每个单词包含：英文、词性、中文释义、考试频率
 - 单词按频率从高到低排序（非字母顺序）
 
-## 自定义词汇
+## 词库导入
 
-如需添加更多单词，编辑 `vocabulary.js` 文件：
+项目支持从文本文件批量导入词库，可以自定义添加新的词汇。
+
+### 词库文件格式
+
+词库文件必须是 **UTF-8 编码**的文本文件，每行一个单词，格式如下：
+
+```
+单词[TAB]词性. 中文释义
+```
+
+**重要说明：**
+- 单词和释义之间使用 **Tab 键**（`\t`）分隔，不是空格
+- 词性后面有一个 **英文句点**（`.`）
+- 词性使用标准缩写：`n.`（名词）、`v.`（动词）、`adj.`（形容词）、`adv.`（副词）等
+
+### 示例词库文件
+
+创建一个名为 `my-words.txt` 的文件：
+
+```
+consistent	adj. 一致的
+battery	n. 电池
+preserve	v. 保存，保护
+absolutely	adv. 绝对地，完全地
+```
+
+### 方法一：使用导入脚本（推荐）
+
+**步骤：**
+
+1. **准备词库文件**
+   - 将词库文件放到 `lexicon` 目录下
+   - 文件名必须是：
+     - `CET-6.txt` - 六级词汇
+     - `postgraduate entrance exams.txt` - 考研词汇
+
+2. **运行导入脚本**
+   ```bash
+   python3 import_lexicon.py
+   ```
+
+3. **查看导入结果**
+   ```bash
+   # 脚本会显示导入的词汇数量
+   正在导入词库...
+   CET-6 词库: /path/to/lexicon/CET-6.txt
+   考研词库: /path/to/lexicon/postgraduate entrance exams.txt
+   ✓ CET-6 词汇数量: 5651
+   ✓ 考研词汇数量: 9602
+   ✓ 词库已导入到: /path/to/vocabulary.js
+   完成！
+   ```
+
+4. **重启服务器**
+   ```bash
+   ./stop.sh
+   ./run.sh
+   ```
+
+### 方法二：手动编辑 vocabulary.js
+
+如果只需要添加少量单词，可以直接编辑 `vocabulary.js` 文件：
 
 ```javascript
 const CET6_VOCABULARY = [
-    { word: "example", meaning: "例子；实例", frequency: 100 },
-    // 添加更多单词...
+    { word: "example", pos: "n.", meaning: "例子；实例", frequency: 100 },
+    { word: "study", pos: "v.", meaning: "学习；研究", frequency: 99 },
+    { word: "important", pos: "adj.", meaning: "重要的", frequency: 98 },
+    // 继续添加更多单词...
 ];
 ```
+
+**字段说明：**
+- `word`: 英文单词
+- `pos`: 词性（`n.`, `v.`, `adj.`, `adv.` 等）
+- `meaning`: 中文释义
+- `frequency`: 频率值（数字越大，优先级越高）
+
+### 添加新词书
+
+如果想添加其他类型的词书（如雅思、托福），需要修改 `import_lexicon.py`：
+
+1. 在 `lexicon` 目录下添加新的词库文件，如 `IELTS.txt`
+
+2. 修改 `import_lexicon.py` 中的 `main()` 函数：
+   ```python
+   # 读取词库文件
+   cet6_file = os.path.join(lexicon_dir, 'CET-6.txt')
+   kaoyan_file = os.path.join(lexicon_dir, 'postgraduate entrance exams.txt')
+   ielts_file = os.path.join(lexicon_dir, 'IELTS.txt')  # 新增
+   
+   # 解析词库
+   cet6_words = parse_lexicon_file(cet6_file)
+   kaoyan_words = parse_lexicon_file(kaoyan_file)
+   ielts_words = parse_lexicon_file(ielts_file)  # 新增
+   ```
+
+3. 更新前端 `index.html` 的词书选择下拉框
+
+### 常见问题
+
+**Q: 导入后看不到新词汇？**
+- 确保重启了服务器
+- 清除浏览器缓存（Ctrl+F5 强制刷新）
+
+**Q: 词库文件格式错误？**
+- 检查是否使用 Tab 键分隔（不是空格）
+- 确保文件编码是 UTF-8
+- 确认词性后面有英文句点
+
+**Q: 如何批量编辑词库文件？**
+- 推荐使用 Excel 或 Google Sheets 编辑
+- 第一列：单词，第二列：词性. 中文释义
+- 导出时选择"制表符分隔"（TSV）格式
+- 确保保存为 UTF-8 编码
 
 ## 故障排除
 
@@ -217,12 +324,14 @@ curl http://localhost:5000/api/backup
 
 ## 更新日志
 
-### v1.0.1 (2026-9-17)
-- 初始版本
-- 支持六级和考研词汇
-- 实现三轮学习法
-- 艾宾浩斯复习系统
-- 签到和统计功能
+### v1.0.3 (2026-09-19)
+- 🎉 **词库大幅扩充**
+- ✨ CET-6 词库：从 95 个扩充到 5651 个词汇
+- ✨ 考研词库：从 100 个扩充到 9602 个词汇
+- ✨ 添加词库导入功能（import_lexicon.py）
+- ✨ 所有单词现在显示词性（n./v./adj./adv. 等）
+- ✨ 支持从文本文件批量导入词库
+- 📝 更新词汇数据格式，增加 `pos` 字段存储词性
 
 ### v1.0.2 (2026-09-18)
 - 🎉 **重大更新：数据存储方式改变**
@@ -235,3 +344,14 @@ curl http://localhost:5000/api/backup
 - ✨ 数据持久化更可靠，不再受浏览器清理影响
 - 🐛 修复异步加载导致页面卡死的问题
 - 📝 更新部署文档，添加详细的安装和使用说明
+
+### v1.0.1 (2026-09-17)
+- 🐛 修复异步加载导致页面卡死的问题
+- 📝 更新部署文档，添加详细的安装和使用说明
+
+## 即将更新
+
+- 修改未签到显示连续签到次数为0的bug
+- 复习不是按照艾宾浩斯遗忘曲线进行的
+- 将拼写部分修改为一个字母一个下划线
+- 添加音标，例句和读音（最好）

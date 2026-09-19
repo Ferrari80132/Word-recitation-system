@@ -11,6 +11,7 @@ class VocabularyApp {
         this.currentRound = 1;
         this.round1Results = {};
         this.round2Results = {};
+        this.round3Results = {};
         this.studyMode = 'learning';
         this.checkinDates = new Set();
         this.dailyStats = {};
@@ -97,6 +98,14 @@ class VocabularyApp {
             console.error('保存数据失败:', error);
             console.log('数据将在本地会话中保留，请检查服务器连接');
         }
+    }
+
+    // 格式化释义（添加词性）
+    formatMeaning(word) {
+        if (word.pos) {
+            return `${word.pos} ${word.meaning}`;
+        }
+        return word.meaning;
     }
 
     // 更新学习单词列表
@@ -224,6 +233,7 @@ class VocabularyApp {
         this.currentRound = 1;
         this.round1Results = {};
         this.round2Results = {};
+        this.round3Results = {};
 
         this.showView('study-view');
         this.renderRound1();
@@ -245,7 +255,10 @@ class VocabularyApp {
         options.forEach(option => {
             const btn = document.createElement('button');
             btn.className = 'option-btn';
-            btn.textContent = option;
+            // 查找对应的单词对象以获取完整信息
+            const allWords = this.currentBook === 'cet6' ? CET6_VOCABULARY : KAOYAN_VOCABULARY;
+            const optionWord = allWords.find(w => w.meaning === option);
+            btn.textContent = optionWord ? this.formatMeaning(optionWord) : option;
             btn.addEventListener('click', () => {
                 this.handleRound1Answer(btn, option === word.meaning);
             });
@@ -263,9 +276,10 @@ class VocabularyApp {
         btn.classList.add(isCorrect ? 'correct' : 'wrong');
 
         // 禁用所有按钮
+        const correctAnswer = this.formatMeaning(word);
         document.querySelectorAll('#options1 .option-btn').forEach(b => {
             b.disabled = true;
-            if (b.textContent === word.meaning && !isCorrect) {
+            if (b.textContent === correctAnswer && !isCorrect) {
                 b.classList.add('correct');
             }
         });
@@ -289,7 +303,7 @@ class VocabularyApp {
         document.getElementById('round3').classList.add('hidden');
 
         const word = this.currentStudyGroup[this.currentWordIndex];
-        document.getElementById('word-cn').textContent = word.meaning;
+        document.getElementById('word-cn').textContent = this.formatMeaning(word);
 
         const options = this.generateOptions(word, 'word');
         const container = document.getElementById('options2');
@@ -341,7 +355,7 @@ class VocabularyApp {
         document.getElementById('round3').classList.remove('hidden');
 
         const word = this.currentStudyGroup[this.currentWordIndex];
-        document.getElementById('word-cn-spell').textContent = word.meaning;
+        document.getElementById('word-cn-spell').textContent = this.formatMeaning(word);
 
         const input = document.getElementById('spell-input');
         input.value = '';
@@ -370,6 +384,9 @@ class VocabularyApp {
         const input = document.getElementById('spell-input');
         const userAnswer = input.value.trim().toLowerCase();
         const isCorrect = userAnswer === word.word.toLowerCase();
+
+        // 记录第三轮结果
+        this.round3Results[word.word] = isCorrect;
 
         const feedback = document.getElementById('spell-feedback');
         if (isCorrect) {
@@ -447,6 +464,22 @@ class VocabularyApp {
 
     // 完成学习
     finishStudy() {
+        // 计算实际的已掌握和需复习数量
+        let masteredCount = 0;
+        let reviewCount = 0;
+
+        this.currentStudyGroup.forEach(word => {
+            const r1 = this.round1Results[word.word];
+            const r2 = this.round2Results[word.word];
+            const r3 = this.round3Results ? this.round3Results[word.word] : false;
+
+            if (r1 && r2 && r3) {
+                masteredCount++;
+            } else {
+                reviewCount++;
+            }
+        });
+
         // 更新每日统计
         const today = new Date().toISOString().split('T')[0];
         if (!this.dailyStats[today]) {
@@ -465,7 +498,7 @@ class VocabularyApp {
         this.renderMain();
         this.updateChart();
 
-        alert(`完成学习！\n已掌握：${Object.values(this.round1Results).filter(v => v).length} 个\n需复习：${Object.values(this.round1Results).filter(v => !v).length} 个`);
+        alert(`完成学习！\n已掌握：${masteredCount} 个\n需复习：${reviewCount} 个`);
     }
 
     // 生成选项
@@ -526,7 +559,7 @@ class VocabularyApp {
             item.className = 'word-item';
             item.innerHTML = `
                 <div class="word-item-en">${word.word}</div>
-                <div class="word-item-cn">${word.meaning}</div>
+                <div class="word-item-cn">${this.formatMeaning(word)}</div>
             `;
             list.appendChild(item);
         });
