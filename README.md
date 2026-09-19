@@ -31,15 +31,8 @@
 
 ### 快速启动（推荐）
 
-#### Linux / macOS
 ```bash
 ./run.sh
-```
-
-#### Windows
-双击 `run.bat` 或在命令行中运行：
-```cmd
-run.bat
 ```
 
 脚本会自动：
@@ -49,13 +42,10 @@ run.bat
 - 打开浏览器
 
 **停止服务器：**
-- Linux/Mac: `./stop.sh`
-- Windows: `stop.bat`
+- 运行 `./stop.sh`
 - 或者在运行服务器的终端窗口按 `Ctrl+C`
 
 ### 手动启动
-
-#### 在 Ubuntu/Linux 上部署
 
 1. **克隆或下载项目到本地**
    ```bash
@@ -83,34 +73,6 @@ run.bat
    单词背诵系统服务器启动中...
    数据存储目录: /home/用户名/下载/Word-recitation-system/data
    访问地址: http://localhost:5000
-   ```
-
-5. **打开浏览器访问**
-   ```
-   http://localhost:5000
-   ```
-
-#### 在 Windows 上部署
-
-1. **打开命令提示符或 PowerShell**
-   ```cmd
-   cd C:\path\to\Word-recitation-system
-   ```
-
-2. **创建虚拟环境（可选但推荐）**
-   ```cmd
-   python -m venv venv
-   venv\Scripts\activate
-   ```
-
-3. **安装依赖**
-   ```cmd
-   pip install -r requirements.txt
-   ```
-
-4. **启动服务**
-   ```cmd
-   python server.py
    ```
 
 5. **浏览器访问**
@@ -210,17 +172,11 @@ const CET6_VOCABULARY = [
 
 ### 服务器无法停止
 如果按 `Ctrl+C` 后服务器仍在后台运行：
-- Linux/Mac: 运行 `./stop.sh`
-- Windows: 运行 `stop.bat`
+- 运行 `./stop.sh`
 - 或手动查找进程：
   ```bash
-  # Linux/Mac
   ps aux | grep server.py
   kill <PID>
-  
-  # Windows
-  netstat -ano | findstr :5000
-  taskkill /F /PID <PID>
   ```
 
 ### 无法启动服务器
@@ -261,22 +217,21 @@ curl http://localhost:5000/api/backup
 
 ## 更新日志
 
-### v1.0.2 (2026-09-18)
-- 🎉 **重大更新：数据存储方式改变**
-- ✨ 将数据存储从浏览器 localStorage 迁移到本地文件
-- ✨ 添加 Flask 后端服务器支持
-- ✨ 实现 RESTful API 接口（GET/POST /api/data, GET /api/backup）
-- ✨ 添加数据备份功能
-- ✨ 添加一键启动脚本（run.sh 和 run.bat）
-- ✨ 改进错误处理，即使服务器未连接也能正常使用
-- ✨ 数据持久化更可靠，不再受浏览器清理影响
-- 🐛 修复异步加载导致页面卡死的问题
-- 📝 更新部署文档，添加详细的安装和使用说明
-
-### v1.0.0 (2024)
+### v1.0.1 (2026-9-17)
 - 初始版本
 - 支持六级和考研词汇
 - 实现三轮学习法
 - 艾宾浩斯复习系统
 - 签到和统计功能
 
+### v1.0.2 (2026-09-18)
+- 🎉 **重大更新：数据存储方式改变**
+- ✨ 将数据存储从浏览器 localStorage 迁移到本地文件
+- ✨ 添加 Flask 后端服务器支持
+- ✨ 实现 RESTful API 接口（GET/POST /api/data, GET /api/backup）
+- ✨ 添加数据备份功能
+- ✨ 添加一键启动脚本（run.sh 和 stop.sh）
+- ✨ 改进错误处理，即使服务器未连接也能正常使用
+- ✨ 数据持久化更可靠，不再受浏览器清理影响
+- 🐛 修复异步加载导致页面卡死的问题
+- 📝 更新部署文档，添加详细的安装和使用说明
