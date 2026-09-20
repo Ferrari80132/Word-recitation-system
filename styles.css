@@ -459,6 +459,53 @@ header {
     opacity: 0.6;
 }
 
+.letter-inputs {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+    padding: var(--spacing-lg) 0;
+}
+
+.letter-input {
+    width: 4rem;
+    height: 4rem;
+    padding: 0;
+    background: var(--surface-2);
+    color: var(--text-primary);
+    border: 2px solid var(--surface-3);
+    border-radius: var(--radius-md);
+    font-size: 2rem;
+    text-align: center;
+    text-transform: lowercase;
+    transition: all 0.2s ease;
+    font-weight: 600;
+}
+
+.letter-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: var(--surface-3);
+    transform: scale(1.05);
+}
+
+.letter-input:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.letter-input.correct {
+    border-color: var(--success);
+    background: rgba(76, 175, 80, 0.1);
+    color: var(--success);
+}
+
+.letter-input.wrong {
+    border-color: var(--error);
+    background: rgba(244, 67, 54, 0.1);
+    color: var(--error);
+}
+
 .spell-input {
     padding: var(--spacing-lg);
     background: var(--surface-2);

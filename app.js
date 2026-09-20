@@ -357,10 +357,46 @@ class VocabularyApp {
         const word = this.currentStudyGroup[this.currentWordIndex];
         document.getElementById('word-cn-spell').textContent = this.formatMeaning(word);
 
-        const input = document.getElementById('spell-input');
-        input.value = '';
-        input.disabled = false;
-        input.focus();
+        // 创建字母输入框
+        const container = document.getElementById('letter-inputs');
+        container.innerHTML = '';
+
+        const wordLength = word.word.length;
+        for (let i = 0; i < wordLength; i++) {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'letter-input';
+            input.maxLength = 1;
+            input.dataset.index = i;
+
+            // 自动聚焦到下一个输入框
+            input.addEventListener('input', (e) => {
+                const value = e.target.value.toLowerCase();
+                if (value && i < wordLength - 1) {
+                    const nextInput = container.querySelector(`[data-index="${i + 1}"]`);
+                    if (nextInput) nextInput.focus();
+                }
+            });
+
+            // 支持退格键返回上一个输入框
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !e.target.value && i > 0) {
+                    const prevInput = container.querySelector(`[data-index="${i - 1}"]`);
+                    if (prevInput) {
+                        prevInput.focus();
+                        prevInput.value = '';
+                    }
+                } else if (e.key === 'Enter') {
+                    this.handleRound3Answer();
+                }
+            });
+
+            container.appendChild(input);
+        }
+
+        // 聚焦第一个输入框
+        const firstInput = container.querySelector('[data-index="0"]');
+        if (firstInput) firstInput.focus();
 
         const feedback = document.getElementById('spell-feedback');
         feedback.textContent = '';
@@ -369,24 +405,40 @@ class VocabularyApp {
         const submitBtn = document.getElementById('submit-spell');
         submitBtn.onclick = () => this.handleRound3Answer();
 
-        input.onkeypress = (e) => {
-            if (e.key === 'Enter') {
-                this.handleRound3Answer();
-            }
-        };
-
         this.updateProgress();
     }
 
     // 处理第三轮答案
     handleRound3Answer() {
         const word = this.currentStudyGroup[this.currentWordIndex];
-        const input = document.getElementById('spell-input');
-        const userAnswer = input.value.trim().toLowerCase();
+        const container = document.getElementById('letter-inputs');
+        const inputs = container.querySelectorAll('.letter-input');
+
+        // 收集用户输入
+        let userAnswer = '';
+        inputs.forEach(input => {
+            userAnswer += input.value.toLowerCase();
+        });
+
         const isCorrect = userAnswer === word.word.toLowerCase();
 
         // 记录第三轮结果
         this.round3Results[word.word] = isCorrect;
+
+        // 显示反馈，标记输入框
+        inputs.forEach((input, index) => {
+            input.disabled = true;
+            const correctLetter = word.word[index].toLowerCase();
+            const userLetter = input.value.toLowerCase();
+
+            if (userLetter === correctLetter) {
+                input.classList.add('correct');
+            } else {
+                input.classList.add('wrong');
+                // 显示正确答案
+                input.value = word.word[index];
+            }
+        });
 
         const feedback = document.getElementById('spell-feedback');
         if (isCorrect) {
@@ -396,8 +448,6 @@ class VocabularyApp {
             feedback.textContent = `✗ 错误！正确答案是：${word.word}`;
             feedback.className = 'spell-feedback wrong';
         }
-
-        input.disabled = true;
 
         setTimeout(() => {
             // 判断单词是否掌握
@@ -603,11 +653,15 @@ class VocabularyApp {
         const dates = Array.from(this.checkinDates).sort().reverse();
         let streak = 0;
         const today = new Date();
+        const todayStr = today.toISOString().split('T')[0];
+
+        // 判断今天是否已签到，决定从哪天开始计算
+        const startOffset = this.checkinDates.has(todayStr) ? 0 : 1;
 
         for (let i = 0; i < dates.length; i++) {
             const checkDate = new Date(dates[i]);
             const expectedDate = new Date(today);
-            expectedDate.setDate(today.getDate() - i);
+            expectedDate.setDate(today.getDate() - i - startOffset);
 
             if (checkDate.toISOString().split('T')[0] === expectedDate.toISOString().split('T')[0]) {
                 streak++;
