@@ -16,6 +16,7 @@
                     <option value="cet6">六级词汇</option>
                     <option value="kaoyan">考研词汇</option>
                 </select>
+                <button id="search-btn" class="icon-btn" title="搜索单词">🔍</button>
                 <button id="theme-toggle" class="icon-btn" title="切换主题">
                     <span class="theme-icon">🌙</span>
                 </button>
@@ -144,6 +145,23 @@
         </div>
         <div class="mastered-content">
             <div id="mastered-list" class="word-list"></div>
+        </div>
+    </div>
+
+    <!-- 搜索界面 -->
+    <div id="search-view" class="view">
+        <div class="view-header">
+            <button class="back-btn">← 返回</button>
+            <h2>单词搜索</h2>
+        </div>
+        <div class="search-content">
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="输入英文单词或中文释义..." autocomplete="off">
+                <div class="search-stats">
+                    <span id="search-result-count"></span>
+                </div>
+            </div>
+            <div id="search-results" class="word-list"></div>
         </div>
     </div>
 

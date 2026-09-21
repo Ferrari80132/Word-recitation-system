@@ -578,12 +578,20 @@ header {
 
 .word-item {
     display: grid;
-    grid-template-columns: auto 1fr;
+    grid-template-columns: auto 1fr auto;
     gap: var(--spacing-lg);
+    align-items: center;
     padding: var(--spacing-lg);
     background: var(--surface-1);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-sm);
+    transition: all 0.2s ease;
+}
+
+.word-item:hover {
+    background: var(--surface-2);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
 }
 
 .word-item-en {
@@ -594,6 +602,114 @@ header {
 
 .word-item-cn {
     color: var(--text-secondary);
+}
+
+.search-content {
+    max-width: 1000px;
+    margin: var(--spacing-2xl) auto;
+    padding: 0 var(--spacing-xl);
+}
+
+.search-box {
+    background: var(--surface-1);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
+    box-shadow: var(--shadow-md);
+    display: grid;
+    gap: var(--spacing-md);
+}
+
+#search-input {
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: var(--surface-2);
+    color: var(--text-primary);
+    border: 2px solid var(--surface-3);
+    border-radius: var(--radius-full);
+    font-size: 1.125rem;
+    transition: all 0.2s ease;
+}
+
+#search-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: var(--surface-0);
+}
+
+.search-stats {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+#search-results {
+    min-height: 200px;
+}
+
+#search-results:empty::before {
+    content: '输入关键词开始搜索...';
+    display: block;
+    text-align: center;
+    color: var(--text-tertiary);
+    padding: var(--spacing-2xl);
+    font-size: 1.125rem;
+}
+
+.word-item.highlight {
+    border: 2px solid var(--accent);
+    background: var(--surface-2);
+}
+
+.word-item-status {
+    margin-left: auto;
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.word-item-labels {
+    display: flex;
+    gap: var(--spacing-xs);
+    align-items: center;
+}
+
+.word-source {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-full);
+    font-size: 0.7rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.source-cet6 {
+    background: #3B82F6;
+    color: white;
+}
+
+.source-kaoyan {
+    background: #8B5CF6;
+    color: white;
+}
+
+.source-both {
+    background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+    color: white;
+}
+
+.status-mastered {
+    background: var(--success);
+    color: white;
+}
+
+.status-review {
+    background: var(--warning);
+    color: white;
+}
+
+.status-learning {
+    background: var(--accent);
+    color: white;
 }
 
 @media (max-width: 768px) {
@@ -607,5 +723,14 @@ header {
 
     .calendar-grid {
         gap: 2px;
+    }
+
+    .word-item {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-sm);
+    }
+
+    .word-item-labels {
+        justify-content: flex-start;
     }
 }

@@ -178,6 +178,16 @@ class VocabularyApp {
                 this.renderMain();
             });
         });
+
+        // 搜索按钮
+        document.getElementById('search-btn').addEventListener('click', () => {
+            this.showSearchView();
+        });
+
+        // 搜索输入
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            this.performSearch(e.target.value);
+        });
     }
 
     // 签到功能
@@ -851,6 +861,134 @@ class VocabularyApp {
             view.classList.remove('active');
         });
         document.getElementById(viewId).classList.add('active');
+    }
+
+    // 显示搜索界面
+    showSearchView() {
+        this.showView('search-view');
+        document.getElementById('search-input').value = '';
+        document.getElementById('search-input').focus();
+        document.getElementById('search-results').innerHTML = '';
+        document.getElementById('search-result-count').textContent = '';
+    }
+
+    // 执行搜索
+    performSearch(query) {
+        const searchResults = document.getElementById('search-results');
+        const resultCount = document.getElementById('search-result-count');
+
+        if (!query || query.trim().length === 0) {
+            searchResults.innerHTML = '';
+            resultCount.textContent = '';
+            return;
+        }
+
+        const searchTerm = query.trim().toLowerCase();
+
+        // 搜索所有词库（六级 + 考研）
+        const allCET6Words = CET6_VOCABULARY || [];
+        const allKaoyanWords = KAOYAN_VOCABULARY || [];
+        const allWords = [...allCET6Words, ...allKaoyanWords];
+
+        // 去重（如果两个词库有重复单词）
+        const uniqueWords = [];
+        const seenWords = new Set();
+
+        allWords.forEach(word => {
+            if (!seenWords.has(word.word)) {
+                seenWords.add(word.word);
+                uniqueWords.push(word);
+            }
+        });
+
+        // 搜索匹配的单词（英文或中文）
+        const results = uniqueWords.filter(word => {
+            const englishMatch = word.word.toLowerCase().includes(searchTerm);
+            const chineseMatch = word.meaning.includes(searchTerm);
+            const posMatch = word.pos && word.pos.toLowerCase().includes(searchTerm);
+            return englishMatch || chineseMatch || posMatch;
+        });
+
+        // 限制显示数量，避免性能问题
+        const maxResults = 100;
+        const displayResults = results.slice(0, maxResults);
+
+        // 更新结果计数
+        if (results.length === 0) {
+            resultCount.textContent = '未找到匹配的单词';
+            searchResults.innerHTML = '<div style="text-align: center; color: var(--text-tertiary); padding: 2rem;">没有找到匹配的单词</div>';
+            return;
+        }
+
+        resultCount.textContent = `找到 ${results.length} 个结果${results.length > maxResults ? `（显示前 ${maxResults} 个）` : ''}`;
+
+        // 渲染搜索结果
+        searchResults.innerHTML = '';
+        displayResults.forEach(word => {
+            const item = document.createElement('div');
+            item.className = 'word-item';
+
+            // 判断单词状态
+            const status = this.getWordStatus(word.word);
+
+            // 判断单词来源（六级/考研/两者都有）
+            const inCET6 = allCET6Words.some(w => w.word === word.word);
+            const inKaoyan = allKaoyanWords.some(w => w.word === word.word);
+            let sourceLabel = '';
+            if (inCET6 && inKaoyan) {
+                sourceLabel = '<span class="word-source source-both">六级+考研</span>';
+            } else if (inCET6) {
+                sourceLabel = '<span class="word-source source-cet6">六级</span>';
+            } else if (inKaoyan) {
+                sourceLabel = '<span class="word-source source-kaoyan">考研</span>';
+            }
+
+            item.innerHTML = `
+                <div class="word-item-en">${this.highlightText(word.word, searchTerm)}</div>
+                <div class="word-item-cn">${this.highlightText(this.formatMeaning(word), searchTerm)}</div>
+                <div class="word-item-labels">
+                    ${sourceLabel}
+                    ${status ? `<div class="word-item-status status-${status.type}">${status.label}</div>` : ''}
+                </div>
+            `;
+
+            searchResults.appendChild(item);
+        });
+    }
+
+    // 获取单词状态
+    getWordStatus(wordText) {
+        const isMastered = this.masteredWords.some(w => w.word === wordText);
+        if (isMastered) {
+            return { type: 'mastered', label: '已掌握' };
+        }
+
+        const isReview = this.reviewWords.some(w => w.word === wordText);
+        if (isReview) {
+            return { type: 'review', label: '复习中' };
+        }
+
+        const isLearning = this.learningWords.some(w => w.word === wordText);
+        if (isLearning) {
+            return { type: 'learning', label: '待学习' };
+        }
+
+        return null;
+    }
+
+    // 高亮匹配文本
+    highlightText(text, searchTerm) {
+        if (!searchTerm || searchTerm.length === 0) {
+            return text;
+        }
+
+        const regex = new RegExp(`(${this.escapeRegex(searchTerm)})`, 'gi');
+        return text.replace(regex, '<mark style="background: var(--accent); color: white; padding: 0 0.25rem; border-radius: 4px;">$1</mark>');
+    }
+
+    // 转义正则表达式特殊字符
+    escapeRegex(string) {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
 }
 
