@@ -275,12 +275,24 @@ class VocabularyApp {
 
         btn.classList.add(isCorrect ? 'correct' : 'wrong');
 
-        // 禁用所有按钮
+        // 禁用所有按钮并显示所有选项的释义
+        const allWords = this.currentBook === 'cet6' ? CET6_VOCABULARY : KAOYAN_VOCABULARY;
         const correctAnswer = this.formatMeaning(word);
+
         document.querySelectorAll('#options1 .option-btn').forEach(b => {
             b.disabled = true;
             if (b.textContent === correctAnswer && !isCorrect) {
                 b.classList.add('correct');
+            }
+
+            // 为每个选项添加对应的英文单词显示
+            const meaningText = b.textContent;
+            const optionWord = allWords.find(w => this.formatMeaning(w) === meaningText);
+            if (optionWord) {
+                const wordLabel = document.createElement('div');
+                wordLabel.className = 'option-supplement';
+                wordLabel.textContent = optionWord.word;
+                b.appendChild(wordLabel);
             }
         });
 
@@ -293,7 +305,7 @@ class VocabularyApp {
                 this.currentRound = 2;
                 this.renderRound2();
             }
-        }, 1000);
+        }, 2000);
     }
 
     // 第二轮：中文选英文
@@ -329,10 +341,23 @@ class VocabularyApp {
 
         btn.classList.add(isCorrect ? 'correct' : 'wrong');
 
+        // 禁用所有按钮并显示所有选项的释义
+        const allWords = this.currentBook === 'cet6' ? CET6_VOCABULARY : KAOYAN_VOCABULARY;
+
         document.querySelectorAll('#options2 .option-btn').forEach(b => {
             b.disabled = true;
             if (b.textContent === word.word && !isCorrect) {
                 b.classList.add('correct');
+            }
+
+            // 为每个选项添加对应的中文释义显示
+            const wordText = b.textContent;
+            const optionWord = allWords.find(w => w.word === wordText);
+            if (optionWord) {
+                const meaningLabel = document.createElement('div');
+                meaningLabel.className = 'option-supplement';
+                meaningLabel.textContent = this.formatMeaning(optionWord);
+                b.appendChild(meaningLabel);
             }
         });
 
@@ -345,7 +370,7 @@ class VocabularyApp {
                 this.currentRound = 3;
                 this.renderRound3();
             }
-        }, 1000);
+        }, 2000);
     }
 
     // 第三轮：拼写
